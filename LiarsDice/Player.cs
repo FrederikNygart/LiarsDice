@@ -12,7 +12,7 @@ namespace LiarsDice
         private Random DiceThrow = new Random();
 
 
-        /** INTERFACE METHODS**/
+        /** GAME INTERFACE public**/
         public Tuple<int, int> Bid()
         {
             throw new NotImplementedException();
