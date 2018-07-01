@@ -9,16 +9,18 @@ namespace LiarsDice
         public int Lives;
         public int[] Dice;
         private bool CupNotEmpty => Dice.Count() > 0;
-        private Random DiceThrow = new Random();
+        private static Random DiceThrow = new Random();
 
 
         /** GAME INTERFACE public**/
+
         public Tuple<int, int> Bid()
         {
             throw new NotImplementedException();
         }
 
         /**GAME ENGINE internals**/
+
         internal int[] RollDice()
         {
             if (CupNotEmpty)
@@ -41,7 +43,7 @@ namespace LiarsDice
 
         private void SetAmountOfDice(int amountOfDice) => Dice = new int[amountOfDice];
 
-        private int Roll()
+        private static int Roll()
         {
             return DiceThrow.Next(1, 7);
         }

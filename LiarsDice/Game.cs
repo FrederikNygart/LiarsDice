@@ -77,6 +77,10 @@ namespace LiarsDice
             return player;
         }
 
+        public void RollDice() => Players.ForEach(player => RollDice(player));
+
+        private void RollDice(Player player) => player.RollDice();
+
         private Bid GetLastBid() => Bids.Last();
 
         private void SetPreviousPlayer(Player player) => PreviousPlayer = player;
