@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using LiarsDice.DataTransferObjects;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -20,26 +21,26 @@ namespace LiarsDice.DatabaseConfig
             }
         }
 
-        public static IMongoCollection<Player> Players
+        public static IMongoCollection<PlayerData> Players
         {
             get
             {
-                return db.GetCollection<Player>("Players");
+                return db.GetCollection<PlayerData>("Players");
             }
         }
 
-        public static IMongoCollection<Player> Games
+        public static IMongoCollection<PlayerData> Games
         {
             get
             {
-                return db.GetCollection<Player>("Games");
+                return db.GetCollection<PlayerData>("Games");
             }
         }
 
 
-        public async static Task InsertPlayerAsync(Player player)
+        public async static Task InsertPlayerAsync(PlayerData player)
         {
-            var collection = db.GetCollection<Player>("Players");
+            var collection = db.GetCollection<PlayerData>("Players");
             await collection.InsertOneAsync(player);
         }
 

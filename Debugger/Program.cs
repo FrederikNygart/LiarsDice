@@ -1,4 +1,5 @@
 ﻿using LiarsDice;
+using LiarsDice.DataTransferObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,14 @@ namespace Debugger
 
         static void TestInsert()
         {
-            var player2 = new Player();
+            var player2 = new PlayerData();
 
             player2.Lives = 2;
-            player2.name = "Jesper";
 
 
-            var player = new Player();
+            var player = new PlayerData();
 
             player.Lives = 2;
-            player.name = "Marianne";
 
             InsertPlayer(player).Wait();
             InsertPlayer(player2).Wait();
@@ -35,7 +34,7 @@ namespace Debugger
             Console.Read();
         }
 
-        static async Task InsertPlayer(Player player)
+        static async Task InsertPlayer(PlayerData player)
         {
             await InsertPlayerAsync(player);
         }
