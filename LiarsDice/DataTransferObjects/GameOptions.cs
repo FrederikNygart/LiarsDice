@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserService.DataTransferObjects
+namespace LiarsDiceService.DataTransferObjects
 {
     public class GameOptions
     {

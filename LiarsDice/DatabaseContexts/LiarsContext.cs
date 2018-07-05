@@ -1,4 +1,4 @@
-﻿using UserService.DataTransferObjects;
+﻿using LiarsDiceService.DataTransferObjects;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using static Resources.Strings;
 
-namespace UserService.DatabaseContexts
+namespace LiarsDiceService.DatabaseContexts
 {
     public static class LiarsContext
     {
@@ -30,11 +30,11 @@ namespace UserService.DatabaseContexts
             }
         }
 
-        public static IMongoCollection<Player> Games
+        public static IMongoCollection<Game> Games
         {
             get
             {
-                return db.GetCollection<Player>(LiarsDiceContextGames);
+                return db.GetCollection<Game>(LiarsDiceContextGames);
             }
         }
     }

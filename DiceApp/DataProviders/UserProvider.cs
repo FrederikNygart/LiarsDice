@@ -1,5 +1,5 @@
-﻿using UserService.DataTransferObjects;
-using static UserService.DatabaseContexts.UsersContext;
+﻿using LiarsDiceService.DataTransferObjects;
+using static LiarsDiceService.DatabaseContexts.UsersContext;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;

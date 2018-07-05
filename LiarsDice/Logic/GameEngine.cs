@@ -1,5 +1,5 @@
-﻿using UserService.DataProviders;
-using UserService.DataTransferObjects;
+﻿using LiarsDiceService.DataProviders;
+using LiarsDiceService.DataTransferObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 
-namespace UserService
+namespace LiarsDiceService
 {
     public class GameEngine
     {
         private Game game;
+        private GameOptions gameOptions => GameProvider.Get(game.Id).gameOptions;
+        private Player liar => GameProvider.GetLiar(game.Id);
+        private List<Player> players => GameProvider.GetPlayers(game.Id);
 
-        public bool IsGameOver => Liar.Lives <= 0;
+        public bool IsGameOver => liar.Lives <= 0;
 
         public GameEngine()
         {
@@ -22,24 +25,23 @@ namespace UserService
 
         public void Start(List<ObjectId> users, GameOptions gameOptions)
         {
-            this.gameOptions = gameOptions;
-
-            Players = users.Select(user => new Player
+            var players = users.Select(user => new Player
                 {
                     User = user,
                     Game = game.Id,
                     Dice = new int[gameOptions.AmountOfDice],
                     Lives = gameOptions.AmountOfLives
-                }).ToList();  
+                }).ToList();
 
+            PlayerProvider.InsertPlayersAsync(players);
+            GameProvider.
 
-
-            SetCurrentPlayer(Players[0]);
+            SetCurrentPlayer(this.players[0]);
         }
 
-        public void AddPlayer() => Players.Add(new Player());
+        public void AddPlayer() => players.Add(new Player());
 
-        public void RemovePlayer(int index) => Players.RemoveAt(index);
+        public void RemovePlayer(int index) => players.RemoveAt(index);
 
         public void Bid(int quantity, int faceValue) => Bids.Add(new Bid { Quantity = quantity, FaceValue = faceValue });
 
@@ -53,11 +55,11 @@ namespace UserService
         public void Challenge()
         {
             var lastBid = GetLastBid();
-            var totalQuantityOfFaceValue = GetQuantityOfFaceValue(Players, lastBid.FaceValue);
+            var totalQuantityOfFaceValue = GetQuantityOfFaceValue(players, lastBid.FaceValue);
 
             var isBidTrue = totalQuantityOfFaceValue >= lastBid.Quantity;
 
-            Liar = isBidTrue ? CurrentPlayer : PreviousPlayer;
+            liar = isBidTrue ? CurrentPlayer : PreviousPlayer;
         }
 
         private int GetQuantityOfFaceValue(List<Player> players, int faceValue)
@@ -66,13 +68,13 @@ namespace UserService
         public void SpotOn()
         {
             var lastBid = GetLastBid();
-            Liar = GetQuantityOfFaceValue(Players, lastBid.FaceValue) == lastBid.Quantity ? CurrentPlayer : PreviousPlayer;
+            liar = GetQuantityOfFaceValue(players, lastBid.FaceValue) == lastBid.Quantity ? CurrentPlayer : PreviousPlayer;
         }
 
         public void PenaliseLiar()
         {
-            var winningPlayers = Players.Where(player => !player.Equals(Liar)).Select(player => RemoveDice(player));
-            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(Liar);
+            var winningPlayers = players.Where(player => !player.Equals(liar)).Select(player => RemoveDice(player));
+            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(liar);
         }
 
         private void RemoveLive(Player liar)
@@ -86,7 +88,7 @@ namespace UserService
             return player;
         }
 
-        public void RollDice() => Players.ForEach(player => RollDice(player));
+        public void RollDice() => players.ForEach(player => RollDice(player));
 
         private void RollDice(Player player)
         {
@@ -102,12 +104,12 @@ namespace UserService
 
         private Player GetNextPlayer()
         {
-            var nextPlayerIndex = Players.IndexOf(CurrentPlayer) + 1;
-            if (nextPlayerIndex < Players.Count) return Players[nextPlayerIndex];
-            return Players[0];
+            var nextPlayerIndex = players.IndexOf(CurrentPlayer) + 1;
+            if (nextPlayerIndex < players.Count) return players[nextPlayerIndex];
+            return players[0];
         }
 
-        private void ApplyGameOptions(GameOptions gameOptions) => Players.ForEach(player => ApplyOptions(gameOptions, player));
+        private void ApplyGameOptions(GameOptions gameOptions) => players.ForEach(player => ApplyOptions(gameOptions, player));
 
         private void ApplyOptions(GameOptions gameOptions, Player player)
         {

@@ -1,4 +1,4 @@
-﻿using UserService.DataTransferObjects;
+﻿using LiarsDiceService.DataTransferObjects;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using static UserService.DatabaseContexts.LiarsContext;
+using static LiarsDiceService.DatabaseContexts.LiarsContext;
 
-namespace UserService.DataProviders
+namespace LiarsDiceService.DataProviders
 {
     public static class PlayerProvider
     {
