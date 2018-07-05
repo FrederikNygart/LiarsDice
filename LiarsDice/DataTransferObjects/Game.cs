@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace LiarsDice.DataTransferObjects
 {
-    public class PlayerData
+    public class Game
     {
         public ObjectId Id { get; set; }
-        public ObjectId Game { get; set; }
-        public ObjectId User { get; set; }
-        public List<Bid> Bids { get; set; }
-        public int Lives { get; set; }
-        public int[] Dice { get; set; }
+        public ObjectId GameOptions { get; set; }
+        public List<ObjectId> Players { get; set; }
+        
     }
 }

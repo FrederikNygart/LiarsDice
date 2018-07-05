@@ -1,24 +1,24 @@
-﻿using LiarsDice.DataTransferObjects;
+﻿using LiarsDice.DataProviders;
+using LiarsDice.DataTransferObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static LiarsDice.Constants;
 
 namespace LiarsDice
 {
-    public class Game
+    public class GameEngine
     {
-        public List<PlayerData> Players;
-        public PlayerData CurrentPlayer;
-        public PlayerData PreviousPlayer;
-        private PlayerData Liar;
+        public List<Player> Players;
+        public Player CurrentPlayer;
+        public Player PreviousPlayer;
+        private Player Liar;
         public GameOptions gameOptions;
         public List<Bid> Bids;
         public Bid LastBid;
 
-        public void AddPlayer() => Players.Add(new PlayerData());
+        public void AddPlayer() => Players.Add(new Player());
 
         public void RemovePlayer(int index) => Players.RemoveAt(index);
 
@@ -50,7 +50,7 @@ namespace LiarsDice
             Liar = isBidTrue ? CurrentPlayer : PreviousPlayer;
         }
 
-        private int GetQuantityOfFaceValue(List<PlayerData> players, int faceValue) 
+        private int GetQuantityOfFaceValue(List<Player> players, int faceValue)
             => players.Aggregate(0, (sum, player) => sum + player.Dice.Where(die => die == faceValue).Count());
 
         public void SpotOn()
@@ -67,12 +67,12 @@ namespace LiarsDice
 
         private bool isGameOver() => Liar.Lives <= 0;
 
-        private void RemoveLive(PlayerData liar)
+        private void RemoveLive(Player liar)
         {
-            liar.Lives -= 1;
+            PlayerProvider.UpdateLives(liar.Id, liar.Lives - 1);
         }
 
-        private PlayerData RemoveDice(PlayerData player)
+        private Player RemoveDice(Player player)
         {
             player.Dice = new int[player.Dice.Count() - 1];
             return player;
@@ -80,18 +80,19 @@ namespace LiarsDice
 
         public void RollDice() => Players.ForEach(player => RollDice(player));
 
-        private void RollDice(PlayerData player)
+        private void RollDice(Player player)
         {
-            player.Dice = new int[4];
+            player.Dice = player.Dice.Select(die => new Random().Next(1, 6)).ToArray();
+            PlayerProvider.UpdateDiceValue(player.Id, player.Dice);
         }
 
         private Bid GetLastBid() => Bids.Last();
 
-        private void SetPreviousPlayer(PlayerData player) => PreviousPlayer = player;
+        private void SetPreviousPlayer(Player player) => PreviousPlayer = player;
 
-        private void SetCurrentPlayer(PlayerData player) => CurrentPlayer = player;
+        private void SetCurrentPlayer(Player player) => CurrentPlayer = player;
 
-        private PlayerData GetNextPlayer()
+        private Player GetNextPlayer()
         {
             var nextPlayerIndex = Players.IndexOf(CurrentPlayer) + 1;
             if (nextPlayerIndex < Players.Count) return Players[nextPlayerIndex];
@@ -100,7 +101,7 @@ namespace LiarsDice
 
         private void ApplyGameOptions(GameOptions gameOptions) => Players.ForEach(player => ApplyOptions(gameOptions, player));
 
-        private void ApplyOptions(GameOptions gameOptions, PlayerData player)
+        private void ApplyOptions(GameOptions gameOptions, Player player)
         {
             throw new NotImplementedException();
         }

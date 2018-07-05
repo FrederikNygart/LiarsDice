@@ -7,22 +7,49 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using static LiarsDice.DatabaseConfig.LiarsContext;
+using static LiarsDice.DatabaseContexts.LiarsContext;
 
 namespace LiarsDice.DataProviders
 {
     public static class PlayerProvider
     {
-        public static PlayerData Get(ObjectId id)
+
+        #region CREATE
+
+        public async static Task InsertPlayerAsync(Player player) => await Players.InsertOneAsync(player);
+
+        #endregion
+
+        #region READ
+
+        public static Player Get(ObjectId id) => Players.Find(p => p.Id == id).Single();
+
+        #endregion
+
+        #region UPDATE
+
+        public static void UpdateLives(ObjectId playerId, int amountOfLives) => UpdatePlayer(playerId, p => p.Lives, amountOfLives);
+
+        public static void UpdateDiceValue(ObjectId playerId, int[] dice) => UpdatePlayer(playerId, p => p.Dice, dice);
+
+        public static UpdateResult UpdatePlayer<T>(
+            ObjectId playerId,
+            System.Linq.Expressions.Expression<Func<Player, T>> currentValueExpression,
+            T updateValue)
         {
-            return Players.Find(p => p.Id == id).Single();
+            var updateDefinition = Builders<Player>.Update.Set(currentValueExpression, updateValue);
+            return Players.UpdateOne<Player>(p => p.Id == playerId, updateDefinition);
         }
 
-        public static void RemoveLive(ObjectId id)
-        {
-            var player = Get(id);
-            var update = Builders<PlayerData>.Update.Set(p => p.Lives, player.Lives -1);
-            Players.UpdateOne<PlayerData>(p => p.Id == id, update);
-        }
+        #endregion
+
+        #region DELETE
+        #endregion
+
+
+
+
+
+
     }
 }

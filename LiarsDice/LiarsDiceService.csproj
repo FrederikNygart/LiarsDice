@@ -58,19 +58,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseConfig\LiarsContext.cs" />
+    <Compile Include="DatabaseContexts\LiarsContext.cs" />
     <Compile Include="DataProviders\PlayerProvider.cs" />
     <Compile Include="DataTransferObjects\Bid.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="DataTransferObjects\GameData.cs" />
+    <Compile Include="DataTransferObjects\Game.cs" />
     <Compile Include="DataTransferObjects\GameOptions.cs" />
-    <Compile Include="DataTransferObjects\PlayerData.cs" />
+    <Compile Include="DataTransferObjects\Player.cs" />
     <Compile Include="Logic\GameEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Resources\Resources.csproj">
+      <Project>{fdd2bd63-3d62-4c24-a0a3-5ede240c193f}</Project>
+      <Name>Resources</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
