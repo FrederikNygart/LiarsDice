@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiarsDice.DataTransferObjects
+namespace UserService.DataTransferObjects
 {
     public class GameOptions
     {
@@ -14,5 +14,6 @@ namespace LiarsDice.DataTransferObjects
         public bool OfAKind = false;
         public bool CanBidOnes = false;
         public bool Stair = false;
+        public int AmountOfLives = 1;
     }
 }

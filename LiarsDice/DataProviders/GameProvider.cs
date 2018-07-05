@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserService
+namespace LiarsDice.DataProviders
 {
-    public class Bid
+    class GameProvider
     {
-        public int Quantity;
-        public int FaceValue;
     }
 }

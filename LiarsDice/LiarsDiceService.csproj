@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseContexts\LiarsContext.cs" />
+    <Compile Include="DataProviders\GameProvider.cs" />
     <Compile Include="DataProviders\PlayerProvider.cs" />
     <Compile Include="DataTransferObjects\Bid.cs" />
     <Compile Include="DataTransferObjects\Game.cs" />

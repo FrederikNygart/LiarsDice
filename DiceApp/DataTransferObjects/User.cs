@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiceApp.DataTransferObjects
+namespace UserService.DataTransferObjects
 {
     public class User
     {

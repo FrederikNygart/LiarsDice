@@ -1,33 +1,47 @@
-﻿using LiarsDice.DataProviders;
-using LiarsDice.DataTransferObjects;
+﻿using UserService.DataProviders;
+using UserService.DataTransferObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 
-namespace LiarsDice
+namespace UserService
 {
     public class GameEngine
     {
-        public List<Player> Players;
-        public Player CurrentPlayer;
-        public Player PreviousPlayer;
-        private Player Liar;
-        public GameOptions gameOptions;
-        public List<Bid> Bids;
-        public Bid LastBid;
+        private Game game;
+
+        public bool IsGameOver => Liar.Lives <= 0;
+
+        public GameEngine()
+        {
+            game = new Game();
+        }
+
+        public void Start(List<ObjectId> users, GameOptions gameOptions)
+        {
+            this.gameOptions = gameOptions;
+
+            Players = users.Select(user => new Player
+                {
+                    User = user,
+                    Game = game.Id,
+                    Dice = new int[gameOptions.AmountOfDice],
+                    Lives = gameOptions.AmountOfLives
+                }).ToList();  
+
+
+
+            SetCurrentPlayer(Players[0]);
+        }
 
         public void AddPlayer() => Players.Add(new Player());
 
         public void RemovePlayer(int index) => Players.RemoveAt(index);
 
-        public void Start()
-        {
-            ApplyGameOptions(gameOptions);
-            SetCurrentPlayer(Players[0]);
-            Bids = new List<Bid>();
-        }
+        public void Bid(int quantity, int faceValue) => Bids.Add(new Bid { Quantity = quantity, FaceValue = faceValue });
 
         public void RotatePlayers()
         {
@@ -35,10 +49,6 @@ namespace LiarsDice
             SetCurrentPlayer(GetNextPlayer());
         }
 
-        public void Bid(int amountOfDice, int eyes)
-        {
-            Bids.Add(new Bid { Quantity = amountOfDice, FaceValue = eyes });
-        }
 
         public void Challenge()
         {
@@ -64,8 +74,6 @@ namespace LiarsDice
             var winningPlayers = Players.Where(player => !player.Equals(Liar)).Select(player => RemoveDice(player));
             if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(Liar);
         }
-
-        private bool isGameOver() => Liar.Lives <= 0;
 
         private void RemoveLive(Player liar)
         {

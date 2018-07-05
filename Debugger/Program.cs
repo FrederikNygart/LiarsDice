@@ -1,6 +1,6 @@
-﻿using LiarsDice;
-using LiarsDice.DataProviders;
-using LiarsDice.DataTransferObjects;
+﻿using UserService;
+using UserService.DataProviders;
+using UserService.DataTransferObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

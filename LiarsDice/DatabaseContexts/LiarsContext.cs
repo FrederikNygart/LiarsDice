@@ -1,4 +1,4 @@
-﻿using LiarsDice.DataTransferObjects;
+﻿using UserService.DataTransferObjects;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using static Resources.Strings;
 
-namespace LiarsDice.DatabaseContexts
+namespace UserService.DatabaseContexts
 {
     public static class LiarsContext
     {
