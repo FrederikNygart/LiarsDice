@@ -1,6 +1,7 @@
 ﻿using LiarsDiceService;
 using LiarsDiceService.DataProviders;
 using LiarsDiceService.DataTransferObjects;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,26 @@ namespace Debugger
         public static GameEngine game = new GameEngine(); 
         static void Main(string[] args)
         {
-            TestGame();
+            var list1 = new List<int> { 1, 2 };
+            var list2 = new List<int> { 1, 2 };
+            Console.Write($"YOOOO it is {list1.Equals(list2)}");
+            Console.ReadKey();
         }
 
-        private static void TestGame()
+        private static void TestStartGame()
         {
-            throw new NotImplementedException();
+            var users = new List<ObjectId> {
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId()
+            };
+
+            var gameOptions = new GameOptions();
+            gameOptions.AmountOfDice = 4;
+            gameOptions.AmountOfLives = 3;
+            gameOptions.Stair = true;
+
+            game.Start(users, gameOptions);
         }
 
         static void TestInsert()

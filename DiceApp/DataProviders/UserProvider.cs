@@ -1,12 +1,9 @@
-﻿using LiarsDiceService.DataTransferObjects;
-using static LiarsDiceService.DatabaseContexts.UsersContext;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
+﻿using MongoDB.Bson;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using UserService.DataTransferObjects;
+using static UserService.DatabaseContexts.UsersContext;
 
 namespace UserService.DataProviders
 {

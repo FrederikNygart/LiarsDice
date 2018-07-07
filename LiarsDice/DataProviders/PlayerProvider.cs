@@ -16,7 +16,11 @@ namespace LiarsDiceService.DataProviders
 
         #region CREATE
 
-        public async static Task InsertPlayerAsync(Player player) => await Players.InsertOneAsync(player);
+        public async static Task InsertPlayerAsync(Player player) 
+            => await Players.InsertOneAsync(player);
+
+        public async static Task InsertPlayersAsync(List<Player> players)
+            => await Players.InsertManyAsync(players);
 
         #endregion
 
@@ -28,9 +32,11 @@ namespace LiarsDiceService.DataProviders
 
         #region UPDATE
 
-        public static void UpdateLives(ObjectId playerId, int amountOfLives) => UpdatePlayer(playerId, p => p.Lives, amountOfLives);
+        public static void SetLives(ObjectId playerId, int amountOfLives) 
+            => UpdatePlayer(playerId, p => p.Lives, amountOfLives);
 
-        public static void UpdateDiceValue(ObjectId playerId, int[] dice) => UpdatePlayer(playerId, p => p.Dice, dice);
+        public static void SetDice(ObjectId playerId, int[] dice) 
+            => UpdatePlayer(playerId, p => p.Dice, dice);
 
         public static UpdateResult UpdatePlayer<T>(
             ObjectId playerId,
@@ -38,9 +44,9 @@ namespace LiarsDiceService.DataProviders
             T updateValue)
         {
             var updateDefinition = Builders<Player>.Update.Set(currentValueExpression, updateValue);
-            return Players.UpdateOne<Player>(p => p.Id == playerId, updateDefinition);
+            return Players.UpdateOne(p => p.Id == playerId, updateDefinition);
         }
-
+        
         #endregion
 
         #region DELETE

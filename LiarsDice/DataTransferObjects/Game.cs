@@ -10,12 +10,11 @@ namespace LiarsDiceService.DataTransferObjects
     public class Game
     {
         public ObjectId Id { get; set; }
-        public ObjectId GameOptions { get; set; }
         public List<ObjectId> Players { get; set; }
         public ObjectId CurrentPlayer;
         public ObjectId PreviousPlayer;
         public ObjectId Liar;
-        public GameOptions gameOptions;
+        public GameOptions GameOptions;
         public List<Bid> Bids;
         public Bid LastBid;
     }
