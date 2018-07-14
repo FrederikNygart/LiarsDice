@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiarsDiceService.DataTransferObjects
+namespace SnydService.DataTransferObjects
 {
     public class Game
     {

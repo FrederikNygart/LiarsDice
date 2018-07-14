@@ -62,7 +62,7 @@
     <Compile Include="DataProviders\GameProvider.cs" />
     <Compile Include="DataProviders\PlayerProvider.cs" />
     <Compile Include="DataTransferObjects\Bid.cs" />
-    <Compile Include="DataTransferObjects\Game.cs" />
+    <Compile Include="DataTransferObjects\LiarsDiceGame.cs" />
     <Compile Include="DataTransferObjects\GameOptions.cs" />
     <Compile Include="DataTransferObjects\Player.cs" />
     <Compile Include="Logic\GameEngine.cs" />

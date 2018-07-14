@@ -1,6 +1,6 @@
-﻿using LiarsDiceService;
-using LiarsDiceService.DataProviders;
-using LiarsDiceService.DataTransferObjects;
+﻿using SnydService;
+using SnydService.DataProviders;
+using SnydService.DataTransferObjects;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;

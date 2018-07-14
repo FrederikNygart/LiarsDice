@@ -68,14 +68,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DiceApp\UserService.csproj">
-      <Project>{b221fdc0-9382-4dff-96fb-6e01f8ff9c1b}</Project>
-      <Name>UserService</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LiarsDice\LiarsDiceService.csproj">
-      <Project>{202c3ce1-f0dd-42f9-9152-4bf15c7d2489}</Project>
-      <Name>LiarsDiceService</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Resources\Resources.csproj">
       <Project>{fdd2bd63-3d62-4c24-a0a3-5ede240c193f}</Project>
       <Name>Resources</Name>
