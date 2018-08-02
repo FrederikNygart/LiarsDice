@@ -68,9 +68,25 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AuthenticationService\AuthenticationService.csproj">
+      <Project>{58c244da-9f8e-46c3-8475-309f99aefbdf}</Project>
+      <Name>AuthenticationService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MatchmakingService\MatchmakingService.csproj">
+      <Project>{63f2d0d9-71c4-4f41-ac93-eb7f2211ac24}</Project>
+      <Name>MatchmakingService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RatingService\RatingService.csproj">
+      <Project>{457f39ce-5ad3-4fc3-96ed-997b7b08e466}</Project>
+      <Name>RatingService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Resources\Resources.csproj">
       <Project>{fdd2bd63-3d62-4c24-a0a3-5ede240c193f}</Project>
       <Name>Resources</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SnydService\SnydService.csproj">
+      <Project>{93f3d01f-4116-490a-bece-d2aee15a7bc3}</Project>
+      <Name>SnydService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
