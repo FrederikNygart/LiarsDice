@@ -10,14 +10,14 @@ namespace SnydService
     public class GameEngine
     {
         private Game game;
-        private GameOptions gameOptions => GameProvider.Get(game.Id).GameOptions;
-        private Player liar => GameProvider.GetLiar(game.Id);
-        private Player previousPlayer => GameProvider.GetPreviousPlayer(game.Id);
-        private Player currentPlayer => GameProvider.GetLiar(game.Id);
-        private List<Player> players => GameProvider.GetPlayers(game.Id);
+        private GameOptions GameOptions => GameProvider.Get(game.Id).GameOptions;
+        private Player Liar => GameProvider.GetLiar(game.Id);
+        private Player PreviousPlayer => GameProvider.GetPreviousPlayer(game.Id);
+        private Player CurrentPlayer => GameProvider.GetLiar(game.Id);
+        private List<Player> Players => GameProvider.GetPlayers(game.Id);
         private List<Bid> Bids => GameProvider.GetBids(game.Id);
 
-        public bool IsGameOver => liar.Lives <= 0;
+        public bool IsGameOver => Liar.Lives <= 0;
 
         public GameEngine()
         {
@@ -37,7 +37,7 @@ namespace SnydService
             }).ToList();
             PlayerProvider.InsertPlayersAsync(players).Wait();
             SetPlayers(players);
-            SetCurrentPlayer(this.players[0]);
+            SetCurrentPlayer(this.Players[0]);
         }
 
         private void SetGameOptions(GameOptions gameOptions)
@@ -47,10 +47,10 @@ namespace SnydService
             => GameProvider.SetPlayers(game.Id, players);
 
         public void AddPlayer()
-            => players.Add(new Player());
+            => Players.Add(new Player());
 
         public void RemovePlayer(int index)
-            => players.RemoveAt(index);
+            => Players.RemoveAt(index);
 
         public void Bid(int quantity, int faceValue)
         {
@@ -69,7 +69,7 @@ namespace SnydService
 
         public void RotatePlayers()
         {
-            SetPreviousPlayer(currentPlayer);
+            SetPreviousPlayer(CurrentPlayer);
             SetCurrentPlayer(GetNextPlayer());
         }
 
@@ -77,35 +77,35 @@ namespace SnydService
         {
             var lastBid = GetLastBid();
             Player liar;
-            if(gameOptions.OfAKind || lastBid.FaceValue == 0)
+            if(GameOptions.OfAKind && lastBid.FaceValue == 0)
             {
                var amountOfAKind = Enumerable.Range(1, 6)
                     .Select(faceVal => GetEvaluationMethod(faceVal))
-                    .Select(evaluation => GetQuantityOfFaceValue(players, evaluation))
+                    .Select(evaluation => GetQuantityOfFaceValue(Players, evaluation))
                     .Max();
 
                 var isBidTrue = amountOfAKind >= lastBid.Quantity;
 
                 liar = isBidTrue 
-                     ? currentPlayer
-                     : previousPlayer;
+                     ? CurrentPlayer
+                     : PreviousPlayer;
 
             }
             else
             {
                 var isBidTrue = 
-                    GetQuantityOfFaceValue(players, GetEvaluationMethod(lastBid.FaceValue)) 
+                    GetQuantityOfFaceValue(Players, GetEvaluationMethod(lastBid.FaceValue)) 
                     >= lastBid.Quantity;
 
                 liar = isBidTrue 
-                    ? currentPlayer 
-                    : previousPlayer;
+                    ? CurrentPlayer 
+                    : PreviousPlayer;
             }
             SetLiar(liar);
         }
 
         private Func<int, bool> GetEvaluationMethod(int faceValue)
-            => gameOptions.LuckyOnes ? LuckyOnesEvaluation(faceValue) : NormalEvaluation(faceValue);
+            => GameOptions.LuckyOnes ? LuckyOnesEvaluation(faceValue) : NormalEvaluation(faceValue);
 
         private Func<int, bool> NormalEvaluation(int faceValue)
             => die => die == faceValue;
@@ -118,7 +118,7 @@ namespace SnydService
             var quantity = 0;
             foreach (var player in players)
             {
-                if (gameOptions.Stair && HasStair(player)) quantity += player.Dice.Count() + 1;
+                if (GameOptions.Stair && HasStair(player)) quantity += player.Dice.Count() + 1;
 
                 else quantity += player.Dice.Where(predicate).Count();
             }
@@ -131,17 +131,17 @@ namespace SnydService
         public void SpotOn()
         {
             var lastBid = GetLastBid();
-            var liar = GetQuantityOfFaceValue(players, GetEvaluationMethod(lastBid.FaceValue)) == lastBid.Quantity ? currentPlayer : previousPlayer;
+            var liar = GetQuantityOfFaceValue(Players, GetEvaluationMethod(lastBid.FaceValue)) == lastBid.Quantity ? CurrentPlayer : PreviousPlayer;
             SetLiar(liar);
         }
 
         public void PenaliseLiar()
         {
-            var winningPlayers = players.Where(player => !player.Equals(liar));
+            var winningPlayers = Players.Where(player => !player.Equals(Liar));
 
             RemoveDice(winningPlayers);
 
-            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(liar);
+            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(Liar);
         }
 
         private void RemoveDice(IEnumerable<Player> winningPlayers)
@@ -159,7 +159,7 @@ namespace SnydService
             => PlayerProvider.SetDice(player.Id, new int[player.Dice.Count() - 1]);
 
         public void RollDice()
-            => players.ForEach(player => RollDice(player));
+            => Players.ForEach(player => RollDice(player));
 
         private void RollDice(Player player)
         {
@@ -177,13 +177,13 @@ namespace SnydService
             => GameProvider.SetCurrentPlayer(game.Id, player);
 
         private void SetLiar(Player player)
-            => GameProvider.SetLiar(game.Id, liar);
+            => GameProvider.SetLiar(game.Id, Liar);
 
         private Player GetNextPlayer()
         {
-            var nextPlayerIndex = players.IndexOf(currentPlayer) + 1;
-            if (nextPlayerIndex < players.Count) return players[nextPlayerIndex];
-            return players[0];
+            var nextPlayerIndex = Players.IndexOf(CurrentPlayer) + 1;
+            if (nextPlayerIndex < Players.Count) return Players[nextPlayerIndex];
+            return Players[0];
         }
     }
 }
