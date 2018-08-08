@@ -18,8 +18,8 @@ namespace SnydService.Controllers
         [SwaggerOperation("")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [AcceptVerbs("GET", "POST")]
-        public void StartGame(List<ObjectId> users)
+        [AcceptVerbs("POST")]
+        public void StartGame([FromBody]List<ObjectId> users)
         {
             new GameEngine().Start(users);
         }

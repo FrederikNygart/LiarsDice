@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Authentication.DataTransferObjects
+namespace AuthenticationService.DataTransferObjects
 {
     public class User
     {
         public ObjectId Id { get; set; }
         public string Name { get; set; }
         public int PhoneNumber { get; set; }
-        public long EloRating { get; set; }
+        public double EloRating { get; set; }
     }
 }

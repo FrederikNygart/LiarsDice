@@ -7,18 +7,31 @@ using System.Threading.Tasks;
 using SnydService;
 using SnydService.DataTransferObjects;
 using SnydService.DataProviders;
+using AuthenticationService.DataProviders;
+using AuthenticationService.DataTransferObjects;
 
 namespace Debugger
 {
     class Program
     {
-        public static GameEngine game = new GameEngine(); 
+        public static GameEngine game = new GameEngine();
         static void Main(string[] args)
         {
-            var list1 = new List<int> { 1, 2 };
-            var list2 = new List<int> { 1, 2 };
-            Console.Write($"YOOOO it is {list1.Equals(list2)}");
+            TestCreateUser();
             Console.ReadKey();
+        }
+
+        private static void TestCreateUser()
+        {
+            UserProvider.Insert(
+                new User
+                {
+                    Id = ObjectId.GenerateNewId(),
+                    Name = "Frederik",
+                    PhoneNumber = 28269533,
+                    EloRating = 1223.23
+                });
+            Console.WriteLine("UserCreateddd!");
         }
 
         private static void TestStartGame()
@@ -34,14 +47,14 @@ namespace Debugger
             gameOptions.AmountOfLives = 3;
             gameOptions.Stair = true;
 
-            game.Start(users, gameOptions);
+            game.Start(users);
         }
 
         static void TestInsert()
         {
             var player = new Player();
             var player2 = new Player();
-            
+
             player2.Lives = 2;
             player.Lives = 2;
 

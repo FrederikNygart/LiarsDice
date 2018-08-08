@@ -1,4 +1,4 @@
-﻿using Authentication.DataTransferObjects;
+﻿using AuthenticationService.DataTransferObjects;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using static Resources.Strings;
 
-namespace Authentication.DatabaseContexts
+namespace AuthenticationService.DatabaseContexts
 {
     public static class UsersContext
     {
