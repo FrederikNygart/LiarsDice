@@ -1,12 +1,12 @@
-﻿using SnydService;
-using SnydService.DataProviders;
-using SnydService.DataTransferObjects;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SnydService;
+using SnydService.DataTransferObjects;
+using SnydService.DataProviders;
 
 namespace Debugger
 {
