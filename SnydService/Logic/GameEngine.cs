@@ -25,9 +25,13 @@ namespace SnydService
             GameProvider.InsertGameAsync(game).Wait();
         }
 
-        public void Start(List<ObjectId> users, GameOptions gameOptions)
+        public void SetGameOptions()
         {
             SetGameOptions(gameOptions);
+        }
+
+        public void Start(List<ObjectId> users)
+        {
             var players = users.Select(user => new Player
             {
                 User = user,
