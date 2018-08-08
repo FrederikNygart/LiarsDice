@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EloRatingService
+namespace RatingService.Logic
+
 {
     public static class EloCalculator
     {

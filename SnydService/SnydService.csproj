@@ -141,13 +141,15 @@
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\GameController.cs" />
+    <Compile Include="Controllers\PlayerController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="DatabaseContexts\LiarsContext.cs" />
     <Compile Include="DataProviders\GameProvider.cs" />
     <Compile Include="DataProviders\PlayerProvider.cs" />
     <Compile Include="DataTransferObjects\Bid.cs" />
     <Compile Include="DataTransferObjects\GameOptions.cs" />
-    <Compile Include="DataTransferObjects\LiarsDiceGame.cs" />
+    <Compile Include="DataTransferObjects\Game.cs" />
     <Compile Include="DataTransferObjects\Player.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

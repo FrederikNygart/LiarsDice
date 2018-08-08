@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserService.DataTransferObjects
+namespace Authentication.DataTransferObjects
 {
     public class User
     {

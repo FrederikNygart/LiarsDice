@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using UserService.DataTransferObjects;
-using static UserService.DatabaseContexts.UsersContext;
+using Authentication.DataTransferObjects;
+using static Authentication.DatabaseContexts.UsersContext;
 
-namespace UserService.DataProviders
+namespace Authentication.DataProviders
 {
     class UserProvider
     {
