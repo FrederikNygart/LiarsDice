@@ -177,6 +177,10 @@
       <Project>{fdd2bd63-3d62-4c24-a0a3-5ede240c193f}</Project>
       <Name>Resources</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WebUtil\WebUtil.csproj">
+      <Project>{e2eda1dc-840f-41d1-b721-28aff7658a7a}</Project>
+      <Name>WebUtil</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -193,7 +197,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>52320</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:52320/</IISUrl>
+          <IISUrl>http://localhost:50001/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -22,24 +22,31 @@ namespace SnydService
         public GameEngine()
         {
             game = new Game();
-            GameProvider.InsertGameAsync(game).Wait();
+            GameProvider.Insert(game);
         }
 
-        public void Start(List<ObjectId> users)
+        public void Start(IEnumerable<ObjectId> users)
         {
-            var players = users.Select(user => new Player
+
+            var players = new List<Player>();
+            foreach(var user in users)
             {
-                User = user,
-                Game = game.Id,
-                Dice = new int[GameOptions.AmountOfDice],
-                Lives = GameOptions.AmountOfLives
-            }).ToList();
+                var player = new Player
+                {
+                    User = user,
+                    Game = game.Id,
+                    Dice = new int[GameOptions.AmountOfDice],
+                    Lives = GameOptions.AmountOfLives
+                };
+                players.Add(player);
+            }
+
             PlayerProvider.InsertPlayersAsync(players).Wait();
             SetPlayers(players);
-            SetCurrentPlayer(this.Players[0]);
+            SetCurrentPlayer(Players[0]);
         }
 
-        private void SetGameOptions(GameOptions gameOptions)
+        internal void SetGameOptions(GameOptions gameOptions)
             => GameProvider.SetGameOptions(game.Id, gameOptions);
 
         private void SetPlayers(List<Player> players)

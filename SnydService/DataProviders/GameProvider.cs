@@ -17,6 +17,9 @@ namespace SnydService.DataProviders
         public async static Task InsertGameAsync(Game game)
             => await Games.InsertOneAsync(game);
 
+        public static void Insert(Game game) 
+            => Games.InsertOne(game);
+
         #endregion
 
 

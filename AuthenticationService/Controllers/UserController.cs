@@ -23,6 +23,15 @@ namespace AuthenticationService.Controllers
             user.Id = ObjectId.GenerateNewId();
             UserProvider.Insert(user);
         }
+
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [Route("~/api/createusers")]
+        [AcceptVerbs("POST")]
+        public void CreateUsers([FromBody] List<User> users)
+        {
+            users.ForEach(x => x.Id = ObjectId.GenerateNewId());
+            UserProvider.InsertMany(users);
+        }
     }
 }
 
