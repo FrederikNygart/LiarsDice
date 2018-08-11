@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Formatting;
 using System.Web.Http;
 
 namespace SnydService
@@ -19,6 +20,9 @@ namespace SnydService
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //var JSONFormatter = config.Formatters.OfType<JsonMediaTypeFormatter>().FirstOrDefault();
+            //JSONFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesResolver()
         }
     }
 }

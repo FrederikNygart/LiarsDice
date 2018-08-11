@@ -63,7 +63,7 @@ namespace SnydService.DataProviders
         internal static void SetPlayers(ObjectId id, List<Player> players) 
             => UpdateGame(id, g => g.Players, players.Select(p => p.Id));
 
-        internal static void SetGameOptions(ObjectId gameId, GameOptions gameOptions)
+        internal static UpdateResult SetGameOptions(ObjectId gameId, GameOptions gameOptions)
             => UpdateGame(gameId, g => g.GameOptions, gameOptions);
 
         public static void SetCurrentPlayer(ObjectId gameId, Player player)

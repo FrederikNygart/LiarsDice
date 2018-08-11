@@ -22,6 +22,9 @@ namespace SnydService.DataProviders
         public async static Task InsertPlayersAsync(List<Player> players)
             => await Players.InsertManyAsync(players);
 
+        public static void InsertPlayers(List<Player> players) 
+            => Players.InsertMany(players);
+
         #endregion
 
         #region READ

@@ -9,109 +9,86 @@ namespace SnydService
 {
     public class GameEngine
     {
-        private Game game;
-        private GameOptions GameOptions => GameProvider.Get(game.Id).GameOptions;
-        private Player Liar => GameProvider.GetLiar(game.Id);
-        private Player PreviousPlayer => GameProvider.GetPreviousPlayer(game.Id);
-        private Player CurrentPlayer => GameProvider.GetLiar(game.Id);
-        private List<Player> Players => GameProvider.GetPlayers(game.Id);
-        private List<Bid> Bids => GameProvider.GetBids(game.Id);
-
-        public bool IsGameOver => Liar.Lives <= 0;
-
         public GameEngine()
         {
-            game = new Game();
-            GameProvider.Insert(game);
         }
 
-        public void Start(IEnumerable<ObjectId> users)
+        public ObjectId Start(IEnumerable<ObjectId> users, GameOptions gameOptions)
         {
-
-            var players = new List<Player>();
-            foreach(var user in users)
+            var g = new Game();
+            GameProvider.Insert(g);
+            SetGameOptions(g.Id, gameOptions);
+            var players = users.Select(user => new Player
             {
-                var player = new Player
-                {
-                    User = user,
-                    Game = game.Id,
-                    Dice = new int[GameOptions.AmountOfDice],
-                    Lives = GameOptions.AmountOfLives
-                };
-                players.Add(player);
-            }
-
-            PlayerProvider.InsertPlayersAsync(players).Wait();
-            SetPlayers(players);
-            SetCurrentPlayer(Players[0]);
+                User = user,
+                Game = g.Id,
+                Dice = new int[gameOptions.AmountOfDice],
+                Lives = gameOptions.AmountOfLives
+            }).ToList();
+            PlayerProvider.InsertPlayers(players);
+            SetPlayers(g.Id,players);
+            SetCurrentPlayer(g.Id, players[0]);
+            return g.Id;
         }
 
-        internal void SetGameOptions(GameOptions gameOptions)
-            => GameProvider.SetGameOptions(game.Id, gameOptions);
-
-        private void SetPlayers(List<Player> players)
-            => GameProvider.SetPlayers(game.Id, players);
-
-        public void AddPlayer()
-            => Players.Add(new Player());
-
-        public void RemovePlayer(int index)
-            => Players.RemoveAt(index);
-
-        public void Bid(int quantity, int faceValue)
+        public void Bid(ObjectId gameId, Bid bid)
         {
-            Bids.Add(new Bid { Quantity = quantity, FaceValue = faceValue });
-            SetBids(Bids);
+            var bids = GetBids(gameId);
+            bids.Add(bid);
+            SetBids(gameId, bids);
+            RotatePlayers(gameId);
         }
 
-        public void BidOfAKind(int quantity)
+        public void BidOfAKind(ObjectId gameId, Bid bid)
         {
-            Bids.Add(new Bid { Quantity = quantity, FaceValue = 0 });
-            SetBids(Bids);
+            if (bid.FaceValue != 0) throw new Exception($"Not possible to accept bid of a kind with a facevalue of: {bid.FaceValue}");
+            var bids = GetBids(gameId);
+            bids.Add(bid);
+            SetBids(gameId, bids);
+            RotatePlayers(gameId);
         }
 
-        private void SetBids(List<Bid> bids)
-            => GameProvider.SetBids(game.Id, bids);
+        private Player GetPlayer(ObjectId playerId) => PlayerProvider.Get(playerId);
 
-        public void RotatePlayers()
+        public void Challenge(ObjectId gameId)
         {
-            SetPreviousPlayer(CurrentPlayer);
-            SetCurrentPlayer(GetNextPlayer());
-        }
-
-        public void Challenge()
-        {
-            var lastBid = GetLastBid();
+            var lastBid = GetLastBid(gameId);
             Player liar;
-            if(GameOptions.OfAKind && lastBid.FaceValue == 0)
+            if (GetGameOptions(gameId).OfAKind && lastBid.FaceValue == 0)
             {
-               var amountOfAKind = Enumerable.Range(1, 6)
-                    .Select(faceVal => GetEvaluationMethod(faceVal))
-                    .Select(evaluation => GetQuantityOfFaceValue(Players, evaluation))
-                    .Max();
+                var amountOfAKind = Enumerable.Range(1, 6)
+                     .Select(faceVal => GetEvaluationMethod(gameId, faceVal))
+                     .Select(evaluation => GetQuantityOfFaceValue(gameId, GetPlayers(gameId), evaluation))
+                     .Max();
 
                 var isBidTrue = amountOfAKind >= lastBid.Quantity;
 
-                liar = isBidTrue 
-                     ? CurrentPlayer
-                     : PreviousPlayer;
+                liar = isBidTrue
+                     ? GetCurrentPlayer(gameId)
+                     : GetPreviousPlayer(gameId);
 
             }
             else
             {
-                var isBidTrue = 
-                    GetQuantityOfFaceValue(Players, GetEvaluationMethod(lastBid.FaceValue)) 
+                var isBidTrue =
+                    GetQuantityOfFaceValue(gameId, GetPlayers(gameId), GetEvaluationMethod(gameId, lastBid.FaceValue))
                     >= lastBid.Quantity;
 
-                liar = isBidTrue 
-                    ? CurrentPlayer 
-                    : PreviousPlayer;
+                liar = isBidTrue
+                     ? GetCurrentPlayer(gameId)
+                     : GetPreviousPlayer(gameId);
             }
-            SetLiar(liar);
+            SetLiar(gameId, liar);
         }
 
-        private Func<int, bool> GetEvaluationMethod(int faceValue)
-            => GameOptions.LuckyOnes ? LuckyOnesEvaluation(faceValue) : NormalEvaluation(faceValue);
+        private void RotatePlayers(ObjectId gameId)
+        {
+            SetPreviousPlayer(gameId, GetCurrentPlayer(gameId));
+            SetCurrentPlayer(gameId, GetNextPlayer(gameId));
+        }
+
+        private Func<int, bool> GetEvaluationMethod(ObjectId gameId, int faceValue)
+            => GetGameOptions(gameId).LuckyOnes ? LuckyOnesEvaluation(faceValue) : NormalEvaluation(faceValue);
 
         private Func<int, bool> NormalEvaluation(int faceValue)
             => die => die == faceValue;
@@ -119,12 +96,12 @@ namespace SnydService
         private Func<int, bool> LuckyOnesEvaluation(int faceValue)
             => die => die == faceValue || die == 1;
 
-        private int GetQuantityOfFaceValue(List<Player> players, Func<int, bool> predicate)
+        private int GetQuantityOfFaceValue(ObjectId gameId, List<Player> players, Func<int, bool> predicate)
         {
             var quantity = 0;
             foreach (var player in players)
             {
-                if (GameOptions.Stair && HasStair(player)) quantity += player.Dice.Count() + 1;
+                if (GetGameOptions(gameId).Stair && HasStair(player)) quantity += player.Dice.Count() + 1;
 
                 else quantity += player.Dice.Where(predicate).Count();
             }
@@ -134,20 +111,23 @@ namespace SnydService
         private bool HasStair(Player player) 
             => Enumerable.Range(1, player.Dice.Count()).All(die => player.Dice.Contains(die));
 
-        public void SpotOn()
+        public void SpotOn(ObjectId gameId)
         {
-            var lastBid = GetLastBid();
-            var liar = GetQuantityOfFaceValue(Players, GetEvaluationMethod(lastBid.FaceValue)) == lastBid.Quantity ? CurrentPlayer : PreviousPlayer;
-            SetLiar(liar);
+            var lastBid = GetLastBid(gameId);
+            var liar = GetQuantityOfFaceValue(gameId, GetPlayers(gameId), GetEvaluationMethod(gameId, lastBid.FaceValue)) == lastBid.Quantity 
+                ? GetCurrentPlayer(gameId) 
+                : GetPreviousPlayer(gameId);
+            SetLiar(gameId, liar);
         }
 
-        public void PenaliseLiar()
+        public void PenaliseLiar(ObjectId gameId)
         {
-            var winningPlayers = Players.Where(player => !player.Equals(Liar));
+            var liar = GetLiar(gameId);
+            var winningPlayers = GetPlayers(gameId).Where(player => !player.Equals(liar));
 
             RemoveDice(winningPlayers);
 
-            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(Liar);
+            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(liar);
         }
 
         private void RemoveDice(IEnumerable<Player> winningPlayers)
@@ -157,6 +137,13 @@ namespace SnydService
                 RemoveDice(player);
             }
         }
+        private Player GetNextPlayer(ObjectId gameId)
+        {
+            var players = GetPlayers(gameId);
+            var nextPlayerIndex = players.IndexOf(GetCurrentPlayer(gameId)) + 1;
+            if (nextPlayerIndex < players.Count) return players[nextPlayerIndex];
+            return players[0];
+        }
 
         private void RemoveLive(Player liar)
             => PlayerProvider.SetLives(liar.Id, liar.Lives - 1);
@@ -164,8 +151,8 @@ namespace SnydService
         private void RemoveDice(Player player)
             => PlayerProvider.SetDice(player.Id, new int[player.Dice.Count() - 1]);
 
-        public void RollDice()
-            => Players.ForEach(player => RollDice(player));
+        public void RollDice(ObjectId gameId)
+            => GetPlayers(gameId).ForEach(player => RollDice(player));
 
         private void RollDice(Player player)
         {
@@ -173,23 +160,60 @@ namespace SnydService
             PlayerProvider.SetDice(player.Id, player.Dice);
         }
 
-        private Bid GetLastBid()
-            => Bids.Last();
+        private Game GetGame(ObjectId id) => GameProvider.Get(id);
 
-        private void SetPreviousPlayer(Player player)
-            => GameProvider.SetPreviousPlayer(game.Id, player);
+        private Bid GetLastBid(ObjectId gameId)
+            => GetBids(gameId).Last();
 
-        private void SetCurrentPlayer(Player player)
-            => GameProvider.SetCurrentPlayer(game.Id, player);
+        private void SetPreviousPlayer(ObjectId gameId, Player player)
+            => GameProvider.SetPreviousPlayer(gameId, player);
 
-        private void SetLiar(Player player)
-            => GameProvider.SetLiar(game.Id, Liar);
+        private void SetCurrentPlayer(ObjectId gameId, Player player)
+            => GameProvider.SetCurrentPlayer(gameId, player);
 
-        private Player GetNextPlayer()
-        {
-            var nextPlayerIndex = Players.IndexOf(CurrentPlayer) + 1;
-            if (nextPlayerIndex < Players.Count) return Players[nextPlayerIndex];
-            return Players[0];
-        }
+        private void SetLiar(ObjectId gameId, Player player)
+            => GameProvider.SetLiar(gameId, player);
+
+        private void SetGameOptions(ObjectId gameId, GameOptions gameOptions)
+           => GameProvider.SetGameOptions(gameId, gameOptions);
+
+        private void SetPlayers(ObjectId gameId, List<Player> players)
+            => GameProvider.SetPlayers(gameId, players);
+
+        private void AddPlayer(ObjectId gameId)
+            => GetPlayers(gameId).Add(new Player());
+
+        private void RemovePlayer(ObjectId gameId, int index)
+            => GetPlayers(gameId).RemoveAt(index);
+
+        private void SetBids(ObjectId gameId, List<Bid> bids)
+            => GameProvider.SetBids(gameId, bids);
+
+        private Player GetLiar(ObjectId gameId)
+            => GameProvider.GetLiar(gameId);
+
+        private List<Bid> GetBids(ObjectId gameId)
+            => GetGame(gameId).Bids;
+
+        private GameOptions GetGameOptions(ObjectId gameId)
+            => GetGame(gameId).GameOptions;
+
+        private List<ObjectId> GetPlayerIds(ObjectId gameId)
+            => GetGame(gameId).Players;
+
+        private ObjectId GetCurrentPlayerId(ObjectId gameId)
+            => GetGame(gameId).CurrentPlayer;
+
+        private ObjectId GetPreviousPlayerId(ObjectId gameId)
+            => GetGame(gameId).PreviousPlayer;
+
+        private List<Player> GetPlayers(ObjectId gameId)
+            => GetPlayerIds(gameId).Select(playerId => GetPlayer(playerId)).ToList();
+
+        private Player GetCurrentPlayer(ObjectId gameId)
+           => GetPlayer(GetCurrentPlayerId(gameId));
+
+        private Player GetPreviousPlayer(ObjectId gameId)
+           => GetPlayer(GetPreviousPlayerId(gameId));
     }
 }

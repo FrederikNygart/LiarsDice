@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using Newtonsoft.Json.Linq;
 using SnydService.DataTransferObjects;
 using Swashbuckle.Swagger.Annotations;
 using System;
@@ -7,10 +8,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using WebUtil;
 
 namespace SnydService.Controllers
 {
+    public  class GameDto{
+        public List<string> Players { get; set; }
+        public GameOptions GameOptions { get; set; }
+    }
+
     [RoutePrefix("api/game")]
     public class GameController : ApiController
     {
@@ -20,31 +25,26 @@ namespace SnydService.Controllers
         [SwaggerResponse(HttpStatusCode.BadRequest)]
         [SwaggerResponse(HttpStatusCode.PreconditionFailed)]
         [AcceptVerbs("POST")]
-        public UpdateResponse Start([FromBody]List<string> usersIds)
+        public IHttpActionResult Start([FromBody]GameDto g)
         {
             try
             {
-                var users = usersIds.Select(userId => ObjectId.Parse(userId));
-                game.Start(users);
-                return new UpdateResponse { Status = HttpStatusCode.OK };
+                var userIds = g.Players.Select(userId => ObjectId.Parse(userId));
+
+                if (userIds.Count() < 1) return BadRequest();
+
+                return Ok(game.Start(userIds, g.GameOptions));
             }
             catch (NullReferenceException e)
             {
-                return new UpdateResponse {
-                    Status = HttpStatusCode.PreconditionFailed,
-                    UserMessage = "Have you set the Game Options?",
-                    Exception = e.Message
-                };
+                return BadRequest(e.Message);
             }
         }
-
-        [SwaggerResponse(HttpStatusCode.OK)]
-        [Route("~/api/setgameoptions")]
-        [AcceptVerbs("POST")]
-        public UpdateResponse SetGameOptions([FromBody] GameOptions gameOptions)
+        
+        public IHttpActionResult Bid(ObjectId id, [FromBody] Bid bid)
         {
-            game.SetGameOptions(gameOptions);
-            return new UpdateResponse { Status = HttpStatusCode.OK };
+            game.Bid(id, bid.Quantity, bid.Quantity);
+            return Ok();
         }
     }
 }
