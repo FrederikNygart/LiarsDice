@@ -33,6 +33,7 @@ namespace SnydService
 
         public void Bid(ObjectId gameId, Bid bid)
         {
+            ValidateBid(gameId, bid);
             var bids = GetBids(gameId);
             bids.Add(bid);
             SetBids(gameId, bids);
@@ -42,13 +43,22 @@ namespace SnydService
         public void BidOfAKind(ObjectId gameId, Bid bid)
         {
             if (bid.FaceValue != 0) throw new Exception($"Not possible to accept bid of a kind with a facevalue of: {bid.FaceValue}");
+            validateQuantity(gameId, bid);
+
             var bids = GetBids(gameId);
             bids.Add(bid);
             SetBids(gameId, bids);
             RotatePlayers(gameId);
         }
 
-        private Player GetPlayer(ObjectId playerId) => PlayerProvider.Get(playerId);
+        public void SpotOn(ObjectId gameId)
+        {
+            var lastBid = GetLastBid(gameId);
+            var liar = GetQuantityOfFaceValue(gameId, GetPlayers(gameId), GetEvaluationMethod(gameId, lastBid.FaceValue)) == lastBid.Quantity
+                ? GetCurrentPlayer(gameId)
+                : GetPreviousPlayer(gameId);
+            SetLiar(gameId, liar);
+        }
 
         public void Challenge(ObjectId gameId)
         {
@@ -81,6 +91,9 @@ namespace SnydService
             SetLiar(gameId, liar);
         }
 
+        public void RollDice(ObjectId gameId)
+            => GetPlayers(gameId).ForEach(player => RollDice(player));
+
         private void RotatePlayers(ObjectId gameId)
         {
             SetPreviousPlayer(gameId, GetCurrentPlayer(gameId));
@@ -111,16 +124,7 @@ namespace SnydService
         private bool HasStair(Player player) 
             => Enumerable.Range(1, player.Dice.Count()).All(die => player.Dice.Contains(die));
 
-        public void SpotOn(ObjectId gameId)
-        {
-            var lastBid = GetLastBid(gameId);
-            var liar = GetQuantityOfFaceValue(gameId, GetPlayers(gameId), GetEvaluationMethod(gameId, lastBid.FaceValue)) == lastBid.Quantity 
-                ? GetCurrentPlayer(gameId) 
-                : GetPreviousPlayer(gameId);
-            SetLiar(gameId, liar);
-        }
-
-        public void PenaliseLiar(ObjectId gameId)
+        private void PenaliseLiar(ObjectId gameId)
         {
             var liar = GetLiar(gameId);
             var winningPlayers = GetPlayers(gameId).Where(player => !player.Equals(liar));
@@ -137,6 +141,7 @@ namespace SnydService
                 RemoveDice(player);
             }
         }
+
         private Player GetNextPlayer(ObjectId gameId)
         {
             var players = GetPlayers(gameId);
@@ -145,20 +150,38 @@ namespace SnydService
             return players[0];
         }
 
+        private void RollDice(Player player)
+        {
+            player.Dice = player.Dice.Select(die => new Random().Next(1, 6)).ToArray();
+            PlayerProvider.SetDice(player.Id, player.Dice);
+        }
+
+        #region Validation
+
+        private void ValidateBid(ObjectId gameId, Bid bid)
+        {
+            if (bid.FaceValue > 6
+                 || bid.FaceValue < 1) throw new Exception($"Invalid facevalue: {bid.FaceValue}");
+
+            validateQuantity(gameId, bid);
+        }
+
+        private void validateQuantity(ObjectId gameId, Bid bid)
+        {
+            if (bid.Quantity < 1 || bid.Quantity > GetGameOptions(gameId).AmountOfDice)
+                throw new Exception($"Invalid quantity: {bid.Quantity}");
+        }
+
+        #endregion
+
+        #region Provider functions
         private void RemoveLive(Player liar)
             => PlayerProvider.SetLives(liar.Id, liar.Lives - 1);
 
         private void RemoveDice(Player player)
             => PlayerProvider.SetDice(player.Id, new int[player.Dice.Count() - 1]);
 
-        public void RollDice(ObjectId gameId)
-            => GetPlayers(gameId).ForEach(player => RollDice(player));
-
-        private void RollDice(Player player)
-        {
-            player.Dice = player.Dice.Select(die => new Random().Next(1, 6)).ToArray();
-            PlayerProvider.SetDice(player.Id, player.Dice);
-        }
+        private Player GetPlayer(ObjectId playerId) => PlayerProvider.Get(playerId);
 
         private Game GetGame(ObjectId id) => GameProvider.Get(id);
 
@@ -215,5 +238,6 @@ namespace SnydService
 
         private Player GetPreviousPlayer(ObjectId gameId)
            => GetPlayer(GetPreviousPlayerId(gameId));
+        #endregion
     }
 }
