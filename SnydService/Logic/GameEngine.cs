@@ -175,15 +175,26 @@ namespace SnydService
         #endregion
 
         #region Provider functions
+        public Game GetGame(ObjectId id) 
+            => GameProvider.Get(id);
+
+        public Player GetCurrentPlayer(ObjectId gameId)
+           => GetPlayer(GetCurrentPlayerId(gameId));
+
+        public Player GetPreviousPlayer(ObjectId gameId)
+           => GetPlayer(GetPreviousPlayerId(gameId));
+
+        public Player GetLiar(ObjectId gameId)
+            => GameProvider.GetLiar(gameId);
+
         private void RemoveLive(Player liar)
             => PlayerProvider.SetLives(liar.Id, liar.Lives - 1);
 
         private void RemoveDice(Player player)
             => PlayerProvider.SetDice(player.Id, new int[player.Dice.Count() - 1]);
 
-        private Player GetPlayer(ObjectId playerId) => PlayerProvider.Get(playerId);
-
-        private Game GetGame(ObjectId id) => GameProvider.Get(id);
+        private Player GetPlayer(ObjectId playerId) 
+            => PlayerProvider.Get(playerId);
 
         private Bid GetLastBid(ObjectId gameId)
             => GetBids(gameId).Last();
@@ -212,9 +223,6 @@ namespace SnydService
         private void SetBids(ObjectId gameId, List<Bid> bids)
             => GameProvider.SetBids(gameId, bids);
 
-        private Player GetLiar(ObjectId gameId)
-            => GameProvider.GetLiar(gameId);
-
         private List<Bid> GetBids(ObjectId gameId)
             => GetGame(gameId).Bids;
 
@@ -233,11 +241,6 @@ namespace SnydService
         private List<Player> GetPlayers(ObjectId gameId)
             => GetPlayerIds(gameId).Select(playerId => GetPlayer(playerId)).ToList();
 
-        private Player GetCurrentPlayer(ObjectId gameId)
-           => GetPlayer(GetCurrentPlayerId(gameId));
-
-        private Player GetPreviousPlayer(ObjectId gameId)
-           => GetPlayer(GetPreviousPlayerId(gameId));
         #endregion
     }
 }

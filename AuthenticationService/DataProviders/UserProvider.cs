@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using AuthenticationService.DataTransferObjects;
 using static AuthenticationService.DatabaseContexts.UsersContext;
 using System.Collections.Generic;
+using System;
 
 namespace AuthenticationService.DataProviders
 {
@@ -22,6 +23,16 @@ namespace AuthenticationService.DataProviders
 
         public static User Get(ObjectId userId) => Users.Find(u => u.Id == userId).Single();
         public static double GetEloRating(ObjectId userId) => Get(userId).EloRating;
+
+        internal static List<User> GetAll()
+        {
+            return Users.Find(_ => true).ToList();
+        }
+
+        internal static User GetBy(int phoneNumber)
+        {
+            return Users.Find(u => u.PhoneNumber == phoneNumber).Single();
+        }
 
         #endregion
 

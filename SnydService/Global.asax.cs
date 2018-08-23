@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Routing;
 
 namespace SnydService
@@ -12,6 +13,15 @@ namespace SnydService
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
+          
+        }
+
+        protected void Application_BeginRequest()
+        {
+            if (Request.Headers.AllKeys.Contains("Origin") && Request.HttpMethod == "OPTIONS")
+            {
+                Response.Flush();
+            }
         }
     }
 }

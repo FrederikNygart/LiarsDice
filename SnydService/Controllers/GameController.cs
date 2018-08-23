@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace SnydService.Controllers
 {
@@ -17,6 +18,7 @@ namespace SnydService.Controllers
     }
 
     [RoutePrefix("api/game")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class GameController : ApiController
     {
         private GameEngine game = new GameEngine();
@@ -42,12 +44,35 @@ namespace SnydService.Controllers
 
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [AcceptVerbs("POST")]
-        public IHttpActionResult Bid(ObjectId id, [FromBody] Bid bid)
+        [AcceptVerbs("GET")]
+        public IHttpActionResult GetCurrentPlayer(string id)
         {
             try
             {
-                game.Bid(id, bid);
+                return Ok(game.GetCurrentPlayer(ObjectId.Parse(id)));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [AcceptVerbs("GET")]
+        public IHttpActionResult GetGame(string id)
+        {
+            return Ok(game.GetGame(ObjectId.Parse(id)));
+        }
+
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.BadRequest)]
+        [AcceptVerbs("POST")]
+        public IHttpActionResult Bid(string id, [FromBody] Bid bid)
+        {
+            try
+            {
+                game.Bid(ObjectId.Parse(id), bid);
                 return Ok();
             }
             catch (Exception e)
@@ -59,11 +84,11 @@ namespace SnydService.Controllers
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
         [AcceptVerbs("POST")]
-        public IHttpActionResult BidOfAKind(ObjectId id, [FromBody] Bid bid)
+        public IHttpActionResult BidOfAKind(string id, [FromBody] Bid bid)
         {
             try
             {
-                game.BidOfAKind(id, bid);
+                game.BidOfAKind(ObjectId.Parse(id), bid);
                 return Ok();
             }
             catch (Exception e)
@@ -75,11 +100,11 @@ namespace SnydService.Controllers
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
         [AcceptVerbs("POST")]
-        public IHttpActionResult Challenge(ObjectId id)
+        public IHttpActionResult Challenge(string id)
         {
             try
             {
-                game.Challenge(id);
+                game.Challenge(ObjectId.Parse(id));
                 return Ok();
             }
             catch (Exception e)
@@ -91,11 +116,11 @@ namespace SnydService.Controllers
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
         [AcceptVerbs("POST")]
-        public IHttpActionResult SpotOn(ObjectId id)
+        public IHttpActionResult SpotOn(string id)
         {
             try
             {
-                game.SpotOn(id);
+                game.SpotOn(ObjectId.Parse(id));
                 return Ok();
             }
             catch (Exception e)
