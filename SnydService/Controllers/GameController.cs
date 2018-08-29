@@ -132,11 +132,11 @@ namespace SnydService.Controllers
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.BadRequest)]
         [AcceptVerbs("POST")]
-        public IHttpActionResult RollDice(ObjectId id)
+        public IHttpActionResult RollDice(string id)
         {
             try
             {
-                game.RollDice(id);
+                game.RollDice(ObjectId.Parse(id));
                 return Ok();
             }
             catch (Exception e)

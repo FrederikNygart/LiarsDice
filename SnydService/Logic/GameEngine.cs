@@ -21,12 +21,10 @@ namespace SnydService
             var players = users.Select(user => new Player
             {
                 User = user,
-                Game = g.Id,
                 Dice = new int[gameOptions.AmountOfDice],
                 Lives = gameOptions.AmountOfLives
             }).ToList();
-            PlayerProvider.InsertPlayers(players);
-            SetPlayers(g.Id,players);
+            SetPlayers(g.Id, players);
             SetCurrentPlayer(g.Id, players[0]);
             return g.Id;
         }
@@ -92,7 +90,7 @@ namespace SnydService
         }
 
         public void RollDice(ObjectId gameId)
-            => GetPlayers(gameId).ForEach(player => RollDice(player));
+            => GetPlayers(gameId).ForEach(player => RollDice(gameId, player));
 
         private void RotatePlayers(ObjectId gameId)
         {
@@ -129,16 +127,16 @@ namespace SnydService
             var liar = GetLiar(gameId);
             var winningPlayers = GetPlayers(gameId).Where(player => !player.Equals(liar));
 
-            RemoveDice(winningPlayers);
+            RemoveDice(gameId, winningPlayers);
 
-            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(liar);
+            if (winningPlayers.All(player => player.Dice.Count() == 0)) RemoveLive(gameId, liar);
         }
 
-        private void RemoveDice(IEnumerable<Player> winningPlayers)
+        private void RemoveDice(ObjectId gameId, IEnumerable<Player> winningPlayers)
         {
             foreach (var player in winningPlayers)
             {
-                RemoveDice(player);
+                RemoveDice(gameId, player);
             }
         }
 
@@ -150,10 +148,10 @@ namespace SnydService
             return players[0];
         }
 
-        private void RollDice(Player player)
+        private void RollDice(ObjectId gameId, Player player)
         {
             player.Dice = player.Dice.Select(die => new Random().Next(1, 6)).ToArray();
-            PlayerProvider.SetDice(player.Id, player.Dice);
+            SetDice(gameId, player);
         }
 
         #region Validation
@@ -175,26 +173,27 @@ namespace SnydService
         #endregion
 
         #region Provider functions
+
         public Game GetGame(ObjectId id) 
             => GameProvider.Get(id);
 
         public Player GetCurrentPlayer(ObjectId gameId)
-           => GetPlayer(GetCurrentPlayerId(gameId));
+           => GetGame(gameId).CurrentPlayer;
 
         public Player GetPreviousPlayer(ObjectId gameId)
-           => GetPlayer(GetPreviousPlayerId(gameId));
+           => GetGame(gameId).PreviousPlayer;
 
         public Player GetLiar(ObjectId gameId)
             => GameProvider.GetLiar(gameId);
 
-        private void RemoveLive(Player liar)
-            => PlayerProvider.SetLives(liar.Id, liar.Lives - 1);
+        private void SetDice(ObjectId gameId, Player player)
+            => GameProvider.SetDice(gameId, player.User, player.Dice);
 
-        private void RemoveDice(Player player)
-            => PlayerProvider.SetDice(player.Id, new int[player.Dice.Count() - 1]);
+        private void RemoveLive(ObjectId gameId, Player liar)
+            => GameProvider.SetLives(gameId, liar.User, liar.Lives - 1);
 
-        private Player GetPlayer(ObjectId playerId) 
-            => PlayerProvider.Get(playerId);
+        private void RemoveDice(ObjectId gameId, Player player)
+            => GameProvider.SetDice(gameId, player.User, new int[player.Dice.Count() - 1]);
 
         private Bid GetLastBid(ObjectId gameId)
             => GetBids(gameId).Last();
@@ -229,17 +228,8 @@ namespace SnydService
         private GameOptions GetGameOptions(ObjectId gameId)
             => GetGame(gameId).GameOptions;
 
-        private List<ObjectId> GetPlayerIds(ObjectId gameId)
-            => GetGame(gameId).Players;
-
-        private ObjectId GetCurrentPlayerId(ObjectId gameId)
-            => GetGame(gameId).CurrentPlayer;
-
-        private ObjectId GetPreviousPlayerId(ObjectId gameId)
-            => GetGame(gameId).PreviousPlayer;
-
         private List<Player> GetPlayers(ObjectId gameId)
-            => GetPlayerIds(gameId).Select(playerId => GetPlayer(playerId)).ToList();
+            => GetGame(gameId).Players;
 
         #endregion
     }

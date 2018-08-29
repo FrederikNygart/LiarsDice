@@ -25,26 +25,26 @@ namespace SnydService.DataProviders
 
         #region READ
 
-        public static List<ObjectId> GetAllPlayer(ObjectId gameId) 
+        public static List<Player> GetAllPlayer(ObjectId gameId) 
             => Games.Find(g => g.Id == gameId).Single().Players;
 
         public static Game Get(ObjectId id)
             => Games.Find(p => p.Id == id).Single();
 
         internal static Player GetLiar(ObjectId gameId)
-            => PlayerProvider.Get(Get(gameId).Liar);
+            => Get(gameId).Liar;
 
         internal static List<Bid> GetBids(ObjectId gameId)
             => Get(gameId).Bids;
 
         internal static List<Player> GetPlayers(ObjectId gameId)
-            => Get(gameId).Players.Select(playerId => PlayerProvider.Get(playerId)).ToList();
+            => Get(gameId).Players.ToList();
 
         internal static Player GetPreviousPlayer(ObjectId gameId)
-            => PlayerProvider.Get(Get(gameId).PreviousPlayer);
+            => Get(gameId).PreviousPlayer;
 
         internal static Player GetCurrentPlayer(ObjectId gameId)
-            => PlayerProvider.Get(Get(gameId).CurrentPlayer);
+            => Get(gameId).CurrentPlayer;
 
         #endregion
 
@@ -60,30 +60,47 @@ namespace SnydService.DataProviders
             return Games.UpdateOne<Game>(game => game.Id == gameId, updateDefinition);
         }
 
+        public static UpdateResult UpdateGameWhere<T>(
+            System.Linq.Expressions.Expression<Func<Game, bool>> filter,
+            System.Linq.Expressions.Expression<Func<Game, T>> currentValueExpression,
+            T updateValue)
+        {
+            var updateDefinition = Builders<Game>.Update.Set(currentValueExpression, updateValue);
+            return Games.UpdateOne<Game>(filter, updateDefinition);
+        }
+
         internal static void SetPlayers(ObjectId id, List<Player> players) 
-            => UpdateGame(id, g => g.Players, players.Select(p => p.Id));
+            => UpdateGame(id, g => g.Players, players);
 
         internal static UpdateResult SetGameOptions(ObjectId gameId, GameOptions gameOptions)
             => UpdateGame(gameId, g => g.GameOptions, gameOptions);
 
         public static void SetCurrentPlayer(ObjectId gameId, Player player)
-            => UpdateGame(gameId, g => g.CurrentPlayer, player.Id);
+            => UpdateGame(gameId, g => g.CurrentPlayer, player);
 
         internal static void SetBids(ObjectId gameId, List<Bid> bids)
             => UpdateGame(gameId, g => g.Bids, bids);
 
         internal static void SetPreviousPlayer(ObjectId gameId, Player player)
-            => UpdateGame(gameId, g => g.PreviousPlayer, player.Id);
+            => UpdateGame(gameId, g => g.PreviousPlayer, player);
 
         internal static void SetLiar(ObjectId gameId, Player player)
-            => UpdateGame(gameId, g => g.Liar, player.Id);
+            => UpdateGame(gameId, g => g.Liar, player);
 
+        internal static void SetDice(ObjectId gameId, ObjectId userId, int[] dice)
+            => UpdateGameWhere(UserIsPlayer(gameId, userId), g => g.Players[-1].Dice, dice);
+
+        internal static void SetLives(ObjectId gameId, ObjectId userId, int lives)
+            => UpdateGameWhere(UserIsPlayer(gameId, userId), g => g.Players[-1].Lives, lives);
+
+        private static System.Linq.Expressions.Expression<Func<Game, bool>> UserIsPlayer(ObjectId gameId, ObjectId userId)
+            => g => g.Id == gameId && g.Players.Any(p => p.User == userId);
 
         #endregion
 
 
-        #region DELETE
+            #region DELETE
 
-        #endregion
+            #endregion
     }
 }

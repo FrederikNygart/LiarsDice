@@ -9,8 +9,6 @@ namespace SnydService.DataTransferObjects
 {
     public class Player
     {
-        public ObjectId Id { get; set; }
-        public ObjectId Game { get; set; }
         public ObjectId User { get; set; }
         public List<Bid> Bids { get; set; }
         public int Lives { get; set; }

@@ -10,12 +10,12 @@ namespace SnydService.DataTransferObjects
     public class Game
     {
         public ObjectId Id { get; set; }
-        public List<ObjectId> Players { get; set; }
-        public ObjectId CurrentPlayer;
-        public ObjectId PreviousPlayer;
-        public ObjectId Liar;
-        public GameOptions GameOptions;
-        public List<Bid> Bids;
-        public Bid LastBid;
+        public List<Player> Players { get; set; }
+        public Player CurrentPlayer { get; set; }
+        public Player PreviousPlayer { get; set; }
+        public Player Liar { get; set; }
+        public GameOptions GameOptions { get; set; }
+        public List<Bid> Bids { get; set; } = new List<Bid>();
+        public Bid LastBid { get; set; }
     }
 }
